@@ -41,7 +41,7 @@ function App() {
     console.log("🤖 AI Step called");
     setIsLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/ai");
+      const res = await axios.get("https://RimshaBashir.pythonanywhere.com/ai");
       console.log("AI Response:", res.data);
       update(res.data);
     } catch (error) {
@@ -61,7 +61,7 @@ function App() {
   const init = async () => {
     setIsLoading(true);
     try {
-      await axios.post("http://localhost:5000/init", {
+      await axios.post("https://RimshaBashir.pythonanywhere.com/init", {
         rows: Number(rows),
         cols: Number(cols)
       });
@@ -75,7 +75,7 @@ function App() {
         setInference(0); // Reset inference counter
         
         // Get initial state
-        const res = await axios.get("http://localhost:5000/state");
+        const res = await axios.get("https://RimshaBashir.pythonanywhere.com/state");
         update(res.data);
       } else {
         alert("Please enter 'player' or 'ai'");
@@ -89,12 +89,12 @@ function App() {
   const reset = async () => {
     setIsLoading(true);
     try {
-      await axios.post("http://localhost:5000/reset", {
+      await axios.post("https://RimshaBashir.pythonanywhere.com/reset", {
         rows: Number(rows),
         cols: Number(cols)
       });
       
-      const res = await axios.get("http://localhost:5000/state");
+      const res = await axios.get("https://RimshaBashir.pythonanywhere.com/state");
       update(res.data);
       setGameOver(false);
       setMessage("");
@@ -110,7 +110,7 @@ function App() {
     
     setIsLoading(true);
     try {
-      const res = await axios.post("http://localhost:5000/move", {
+      const res = await axios.post("https://RimshaBashir.pythonanywhere.com/move", {
         target: [i, j]
       });
       update(res.data);
