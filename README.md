@@ -6,7 +6,7 @@
 
 ## 🌟 Live Demo
 
-**Play Now:** [https://wumpus-gam.netlify.app](https://wumpus-gam.netlify.app)
+**Play Now:** [https://wumpus-game-dual-mode.netlify.app](https://wumpus-game-dual-mode.netlify.app)
 
 ---
 
