@@ -47,7 +47,6 @@ Wumpus World AI is an intelligent agent that navigates a dangerous cave using **
 
 ### Prerequisites
 
-```bash
 # Backend
 pip install flask flask-cors
 
@@ -55,7 +54,7 @@ pip install flask flask-cors
 cd frontend
 npm install axios
 
-##  Setup
+## Setup
 # Clone repository
 git clone https://github.com/rimshabash/wumpus-world-ai.git
 cd wumpus-world-ai
@@ -67,6 +66,7 @@ python app.py
 # Run Frontend (Terminal 2)
 cd frontend
 npm start
+
 ## How to Play
 ## 👤 Player Mode
 Click "Start Game" → Select "player"
@@ -83,17 +83,21 @@ Watch the AI navigate using logic
 See inference steps in real-time
 
 ## Percepts Guide
-Percept	Meaning
-💨 Breeze	Pit is adjacent
-👃 Stench	Wumpus is adjacent
-✨ Glitter	Gold is here!
+
+| Percept | Meaning |
+|---------|---------|
+| 💨 Breeze | Pit is adjacent |
+| 👃 Stench | Wumpus is adjacent |
+| ✨ Glitter | Gold is here! |
 
 ## Game Elements
-Element	Icon	Description
-Agent	🤖	Your character
-Gold	💰	Goal - You win!
-Pit	🕳️	Instant death
-Wumpus	🐉	Deadly monster
+
+| Element | Icon | Description |
+|---------|------|-------------|
+| Agent | 🤖 | Your character |
+| Gold | 💰 | Goal - You win! |
+| Pit | 🕳️ | Instant death |
+| Wumpus | 🐉 | Deadly monster |
 
 ## 🧠 How Resolution Refutation Works
 The AI maintains a Knowledge Base (KB) of propositional logic clauses:
