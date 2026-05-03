@@ -2,30 +2,48 @@
 
 ### Knowledge-Based Agent with Resolution Refutation
 
-[![Netlify Status](https://api.netlify.com/api/v1/badges/your-badge-id/deploy-status)](https://your-app.netlify.app)
-[![Python Version](https://img.shields.io/badge/python-3.11-blue.svg)](https://python.org)
-[![Flask](https://img.shields.io/badge/Flask-2.3.3-green.svg)](https://flask.palletsprojects.com)
-[![React](https://img.shields.io/badge/React-18-blue.svg)](https://reactjs.org)
+![Netlify Status](https://img.shields.io/badge/deployed-success-brightgreen)
+![Python](https://img.shields.io/badge/python-3.11-blue)
+![Flask](https://img.shields.io/badge/flask-2.3.3-green)
+![React](https://img.shields.io/badge/react-18-blue)
 
 ## 🌟 Live Demo
 
 🎮 **Play Now:** [https://wumpus-gam.netlify.app](https://wumpus-gam.netlify.app)
 
+---
+
 ## 📖 About The Project
 
 Wumpus World AI is an intelligent agent that navigates a dangerous cave using **Propositional Logic** and **Resolution Refutation**. The agent receives real-time percepts (Breeze, Stench, Glitter) and uses logical inference to deduce safe paths while avoiding pits and the deadly Wumpus.
 
-### 🎯 Features
+---
 
-- 🧠 **Knowledge-Based Agent** - Uses propositional logic for decision making
-- 📊 **Resolution Refutation Engine** - Proves safe cells using logical contradiction
-- 💨 **Dynamic Percept System** - Real-time Breeze, Stench, and Glitter detection
-- 🎮 **Dual Game Modes** - Player mode (manual) & AI mode (autonomous)
-- 📈 **Real-time Metrics** - Track inference steps, visited cells, and safe cells
-- 🎨 **Beautiful UI** - Gradient design with smooth animations
-- 📱 **Responsive Design** - Works on desktop and mobile devices
+## 🎯 Features
+
+| Feature | Description |
+|---------|-------------|
+| 🧠 **Knowledge-Based Agent** | Uses propositional logic for decision making |
+| 📊 **Resolution Refutation Engine** | Proves safe cells using logical contradiction |
+| 💨 **Dynamic Percept System** | Real-time Breeze, Stench, and Glitter detection |
+| 🎮 **Dual Game Modes** | Player mode (manual) & AI mode (autonomous) |
+| 📈 **Real-time Metrics** | Track inference steps, visited cells, and safe cells |
+| 🎨 **Beautiful UI** | Gradient design with smooth animations |
+| 📱 **Responsive Design** | Works on desktop and mobile devices |
+
+---
 
 ## 🏗️ Architecture
+┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
+│ │ │ │ │ │
+│ React Frontend│────▶│ Flask Backend │────▶│ Resolution │
+│ (Netlify) │◀────│ (PythonAnywhere)│◀────│ Engine │
+│ │ │ │ │ │
+└─────────────────┘ └─────────────────┘ └─────────────────┘
+
+text
+
+---
 
 ## 🛠️ Technologies Used
 
@@ -39,6 +57,8 @@ Wumpus World AI is an intelligent agent that navigates a dangerous cave using **
 - **Flask-CORS** - Cross-origin requests
 - **Custom Resolution Engine** - Propositional logic inference
 
+---
+
 ## 🚀 Getting Started
 
 ### Prerequisites
@@ -50,27 +70,26 @@ pip install flask flask-cors
 # Frontend
 cd frontend
 npm install axios
-
 Local Development
-Clone the repository
+1. Clone the repository
 
 bash
 git clone https://github.com/rimshabash/wumpus-world-ai.git
 cd wumpus-world-ai
-Run Backend Server
+2. Run Backend Server
 
 bash
 cd backend
 python app.py
 # Server runs on http://localhost:5000
-Run Frontend
+3. Run Frontend
 
 bash
 cd frontend
 npm start
 # App runs on http://localhost:3000
 🎮 How to Play
-Player Mode
+👤 Player Mode
 Click "Start Game" → Select "player"
 
 Click on adjacent cells to move
@@ -85,7 +104,7 @@ Percepts guide you:
 
 Find the gold without falling into pits or getting eaten!
 
-AI Mode
+🤖 AI Mode
 Click "Start Game" → Select "ai"
 
 Watch the AI navigate using logical inference
@@ -130,12 +149,10 @@ Resolution algorithm attempts to prove/disprove facts
 
 🌐 Deployment
 Backend (PythonAnywhere)
-bash
-# Free hosting with 512MB storage
+text
 https://RimshaBashir.pythonanywhere.com
 Frontend (Netlify)
-bash
-# Automatic deploys from GitHub
+text
 https://wumpus-gam.netlify.app
 🗂️ Project Structure
 text
@@ -154,6 +171,10 @@ wumpus-world-ai/
 └── README.md
 📄 License
 This project is open source and available under the MIT License.
+
 📧 Contact
 Developer: Rimsha Bashir
+
 GitHub: @rimshabash
+
+Project Link: https://github.com/rimshabash/wumpus-world-ai
