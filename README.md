@@ -110,7 +110,7 @@ Decision - Moves only to proven safe cells
 
 ## 🌐 Deployment
 
-Frontend: https://wumpus-gam.netlify.app
+Frontend: https://wumpus-game-dual-mode.netlify.app
 
 ## 🗂️ Project Structure
 text
