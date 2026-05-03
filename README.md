@@ -2,8 +2,6 @@
 
 **Knowledge-Based Agent with Resolution Refutation**
 
-[![Live Demo](https://img.shields.io/badge/Live_Demo-https://wumpus-gam.netlify.app-brightgreen)](https://wumpus-gam.netlify.app)
-
 ---
 
 ## 🌟 Live Demo
@@ -118,17 +116,30 @@ Frontend: https://wumpus-gam.netlify.app
 ## 🗂️ Project Structure
 text
 wumpus-world-ai/
+
 ├── backend/
+
 │   ├── app.py
+
 │   └── requirements.txt
+
 ├── frontend/
+
 │   ├── src/
+
 │   │   ├── App.js
+
 │   │   ├── App.css
+
 │   │   └── index.js
+
 │   ├── public/
+
 │   │   └── index.html
+
 │   └── package.json
+
 └── README.md
-📧 Contact
+
+## 📧 Contact
 Developer: Rimsha Bashir
