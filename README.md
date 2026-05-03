@@ -109,7 +109,6 @@ Resolution - Finds contradictions to prove safety
 Decision - Moves only to proven safe cells
 
 ## 🌐 Deployment
-Backend: https://RimshaBashir.pythonanywhere.com
 
 Frontend: https://wumpus-gam.netlify.app
 
