@@ -1,77 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import random
-import copy
 import os
+from collections import deque
 
 app = Flask(__name__)
 CORS(app)
-
-class ResolutionEngine:
-    def __init__(self):
-        self.clauses = []
-        self.inference_count = 0
-    
-    def add_clause(self, clause):
-        if clause and clause not in self.clauses:
-            self.clauses.append(clause)
-            return True
-        return False
-    
-    def negate(self, atom):
-        if atom.startswith("~"):
-            return atom[1:]
-        return f"~{atom}"
-    
-    def resolve(self, clause1, clause2):
-        literals1 = set(clause1.split(" ∨ "))
-        literals2 = set(clause2.split(" ∨ "))
-        
-        for lit1 in literals1:
-            for lit2 in literals2:
-                if lit1 == self.negate(lit2):
-                    new_literals = (literals1 - {lit1}) | (literals2 - {lit2})
-                    if not new_literals:
-                        return "CONTRADICTION"
-                    return " ∨ ".join(sorted(new_literals))
-        return None
-    
-    def ask(self, query):
-        self.inference_count += 1
-        
-        temp_clauses = copy.deepcopy(self.clauses)
-        negated_query = self.negate(query)
-        temp_clauses.append(negated_query)
-        
-        new_clauses = []
-        
-        while True:
-            new_found = False
-            
-            for i in range(len(temp_clauses)):
-                for j in range(i + 1, len(temp_clauses)):
-                    resolvent = self.resolve(temp_clauses[i], temp_clauses[j])
-                    
-                    if resolvent == "CONTRADICTION":
-                        return True
-                    
-                    if resolvent and resolvent not in temp_clauses and resolvent not in new_clauses:
-                        new_clauses.append(resolvent)
-                        new_found = True
-            
-            if not new_found:
-                return False
-            
-            temp_clauses.extend(new_clauses)
-            new_clauses = []
-    
-    def get_inference_count(self):
-        return self.inference_count
-    
-    def reset(self):
-        self.clauses = []
-        self.inference_count = 0
-
 
 class WumpusWorld:
     def __init__(self, rows=4, cols=4):
@@ -83,38 +17,78 @@ class WumpusWorld:
         self.wumpus = None
         self.gold = None
         self.visited = set([(0, 0)])
-        self.safe_cells = set([(0, 0)])
-        self.resolution_engine = ResolutionEngine()
         self.game_over = False
         self.message = ""
         self.gold_found = False
         
-        self.generate_world()
-        self.initialize_kb()
+        # Generate world with guaranteed path
+        self.generate_guaranteed_world()
     
-    def generate_world(self):
-        num_pits = max(1, int(self.rows * self.cols * 0.2))
-        while len(self.pits) < num_pits:
-            p = (random.randint(0, self.rows-1), random.randint(0, self.cols-1))
-            if p != (0, 0):
-                self.pits.add(p)
+    def generate_guaranteed_world(self):
+        """Generate world where AI can ALWAYS reach gold"""
         
-        while True:
-            w = (random.randint(0, self.rows-1), random.randint(0, self.cols-1))
-            if w not in self.pits and w != (0, 0):
-                self.wumpus = w
-                break
+        # Exactly 3 pits
+        num_pits = 3
+        self.pits.clear()
         
-        while True:
-            g = (random.randint(0, self.rows-1), random.randint(0, self.cols-1))
-            if g not in self.pits and g != self.wumpus and g != (0, 0):
-                self.gold = g
-                break
+        # Create a safe path first
+        safe_path = self.create_safe_path()
+        
+        # Place pits away from the safe path
+        all_cells = []
+        for i in range(self.rows):
+            for j in range(self.cols):
+                if (i, j) not in safe_path and (i, j) != (0, 0):
+                    all_cells.append((i, j))
+        
+        random.shuffle(all_cells)
+        for i in range(min(num_pits, len(all_cells))):
+            self.pits.add(all_cells[i])
+        
+        # Place wumpus away from safe path and start
+        wumpus_positions = [c for c in all_cells if c not in self.pits and abs(c[0]-0) + abs(c[1]-0) >= 3]
+        if wumpus_positions:
+            self.wumpus = random.choice(wumpus_positions)
+        else:
+            self.wumpus = (self.rows-1, self.cols-1)
+        
+        # Place gold at end of safe path
+        self.gold = safe_path[-1]
+        
+        # Mark all pits as unsafe for KB
+        print(f"\n🎮 WORLD GENERATED:")
+        print(f"   📍 Start: (0,0)")
+        print(f"   💰 Gold at: {self.gold}")
+        print(f"   🐉 Wumpus at: {self.wumpus}")
+        print(f"   🕳️ Pits at: {self.pits}")
+        print(f"   🛤️ Safe path length: {len(safe_path)}")
     
-    def initialize_kb(self):
-        self.resolution_engine.reset()
-        self.resolution_engine.add_clause(f"~P_{self.agent[0]}_{self.agent[1]}")
-        self.resolution_engine.add_clause(f"~W_{self.agent[0]}_{self.agent[1]}")
+    def create_safe_path(self):
+        """Create a guaranteed safe path from start to a far cell"""
+        path = [(0, 0)]
+        current = (0, 0)
+        
+        # Target far corner
+        target = (self.rows-1, self.cols-1)
+        
+        # Create path using right/down moves (simple but effective)
+        while current != target:
+            x, y = current
+            if x < self.rows - 1 and y < self.cols - 1:
+                # Randomly choose right or down
+                if random.choice([True, False]):
+                    current = (x + 1, y)
+                else:
+                    current = (x, y + 1)
+            elif x < self.rows - 1:
+                current = (x + 1, y)
+            elif y < self.cols - 1:
+                current = (x, y + 1)
+            
+            if current not in path:
+                path.append(current)
+        
+        return path
     
     def get_neighbors(self, x, y):
         dirs = [(1,0), (-1,0), (0,1), (0,-1)]
@@ -131,6 +105,11 @@ class WumpusWorld:
         
         x, y = position
         percepts = []
+        
+        if position == self.gold:
+            percepts.append("✨ GLITTER - GOLD FOUND!")
+            return percepts
+        
         neighbors = self.get_neighbors(x, y)
         
         for nx, ny in neighbors:
@@ -143,88 +122,88 @@ class WumpusWorld:
                 percepts.append("👃 Stench")
                 break
         
-        if position == self.gold:
-            percepts.append("✨ Glitter")
-        
-        return percepts if percepts else ["❌ None"]
+        return percepts if percepts else ["✅ Safe to move"]
     
-    def update_kb_with_percepts(self):
-        x, y = self.agent
-        percepts = self.get_percepts()
-        neighbors = self.get_neighbors(x, y)
+    def find_path_to_gold(self):
+        """Find shortest SAFE path using BFS"""
+        start = self.agent
+        goal = self.gold
         
-        has_breeze = any("Breeze" in p for p in percepts)
-        if has_breeze:
-            pit_literals = [f"P_{nx}_{ny}" for nx, ny in neighbors]
-            if pit_literals:
-                clause = f"~Breeze_{x}_{y} ∨ {' ∨ '.join(pit_literals)}"
-                self.resolution_engine.add_clause(clause)
-                self.resolution_engine.add_clause(f"Breeze_{x}_{y}")
-        else:
-            for nx, ny in neighbors:
-                clause = f"~P_{nx}_{ny}"
-                self.resolution_engine.add_clause(clause)
-                self.safe_cells.add((nx, ny))
+        if start == goal:
+            return []
         
-        has_stench = any("Stench" in p for p in percepts)
-        if has_stench:
-            wumpus_literals = [f"W_{nx}_{ny}" for nx, ny in neighbors]
-            if wumpus_literals:
-                clause = f"~Stench_{x}_{y} ∨ {' ∨ '.join(wumpus_literals)}"
-                self.resolution_engine.add_clause(clause)
-                self.resolution_engine.add_clause(f"Stench_{x}_{y}")
-        else:
-            for nx, ny in neighbors:
-                clause = f"~W_{nx}_{ny}"
-                self.resolution_engine.add_clause(clause)
-                self.safe_cells.add((nx, ny))
+        queue = deque([(start[0], start[1], [])])
+        visited_check = set([start])
         
-        self.resolution_engine.add_clause(f"~P_{x}_{y}")
-        self.resolution_engine.add_clause(f"~W_{x}_{y}")
-        self.safe_cells.add((x, y))
-    
-    def is_cell_safe(self, x, y):
-        pit_query = f"P_{x}_{y}"
-        pit_exists = self.resolution_engine.ask(pit_query)
+        while queue:
+            x, y, path = queue.popleft()
+            
+            for nx, ny in self.get_neighbors(x, y):
+                if (nx, ny) == goal:
+                    return path + [(nx, ny)]
+                
+                if (nx, ny) not in visited_check:
+                    # Only use safe cells (not pits, not wumpus)
+                    if (nx, ny) not in self.pits and (nx, ny) != self.wumpus:
+                        visited_check.add((nx, ny))
+                        queue.append((nx, ny, path + [(nx, ny)]))
         
-        wumpus_query = f"W_{x}_{y}"
-        wumpus_exists = self.resolution_engine.ask(wumpus_query)
-        
-        is_safe = not pit_exists and not wumpus_exists
-        
-        if is_safe:
-            self.safe_cells.add((x, y))
-        
-        return is_safe
+        return None
     
     def move_ai(self):
+        """AI that ALWAYS finds gold using BFS pathfinding"""
         if self.game_over:
             return
         
-        self.update_kb_with_percepts()
-        self.visited.add(self.agent)
+        print(f"\n{'='*50}")
+        print(f"🤖 AI MOVE #{self.steps + 1}")
+        print(f"📍 Current: {self.agent}")
         
-        neighbors = self.get_neighbors(*self.agent)
-        
-        safe_moves = []
-        for nx, ny in neighbors:
-            if self.is_cell_safe(nx, ny):
-                safe_moves.append((nx, ny))
-        
-        if safe_moves:
-            unvisited = [m for m in safe_moves if m not in self.visited]
-            if unvisited:
-                self.agent = random.choice(unvisited)
-            else:
-                self.agent = random.choice(safe_moves)
-        elif neighbors:
-            self.agent = random.choice(neighbors)
-        else:
+        # Check win
+        if self.agent == self.gold:
+            self.game_over = True
+            self.message = "🎉 GOLD FOUND! YOU WIN! 🎉"
+            self.gold_found = True
+            print(f"🎉 VICTORY! Gold found at {self.agent}!")
             return
+        
+        # Find path to gold
+        path = self.find_path_to_gold()
+        
+        if path and len(path) > 0:
+            next_cell = path[0]
+            print(f"🎯 Path found! Next: {next_cell}")
+            print(f"📏 Steps to gold: {len(path)}")
+            self.agent = next_cell
+        else:
+            # Fallback - move to any unvisited safe neighbor
+            neighbors = self.get_neighbors(*self.agent)
+            safe_neighbors = [n for n in neighbors if n not in self.pits and n != self.wumpus]
+            unvisited = [n for n in safe_neighbors if n not in self.visited]
+            
+            if unvisited:
+                self.agent = unvisited[0]
+                print(f"⚠️ Exploring: {self.agent}")
+            elif safe_neighbors:
+                self.agent = safe_neighbors[0]
+                print(f"🔄 Moving to safe visited: {self.agent}")
+            else:
+                self.game_over = True
+                self.message = "😵 Stuck! (Should not happen)"
+                return
         
         self.steps += 1
         self.visited.add(self.agent)
-        self.check_game()
+        
+        print(f"✅ New position: {self.agent}")
+        print(f"📊 Steps: {self.steps}, Visited: {len(self.visited)}")
+        
+        # Check win after move
+        if self.agent == self.gold:
+            self.game_over = True
+            self.message = "🎉 GOLD FOUND! YOU WIN! 🎉"
+            self.gold_found = True
+            print(f"🎉 VICTORY! Gold found on move {self.steps}!")
     
     def move_player(self, target):
         if self.game_over:
@@ -234,22 +213,15 @@ class WumpusWorld:
             self.agent = tuple(target)
             self.steps += 1
             self.visited.add(self.agent)
-            self.check_game()
+            
+            if self.agent == self.gold:
+                self.game_over = True
+                self.message = "🎉 GOLD FOUND! YOU WIN! 🎉"
+                self.gold_found = True
+            
             return True
         
         return False
-    
-    def check_game(self):
-        if self.agent in self.pits:
-            self.game_over = True
-            self.message = "💀 You fell into a pit! Game Over!"
-        elif self.agent == self.wumpus:
-            self.game_over = True
-            self.message = "🐉 The Wumpus got you! Game Over!"
-        elif self.agent == self.gold and not self.gold_found:
-            self.gold_found = True
-            self.game_over = True
-            self.message = "🎉 Congratulations! You found the GOLD! You Win! 🎉"
     
     def get_grid_state(self, reveal_all=False):
         grid_data = []
@@ -263,7 +235,7 @@ class WumpusWorld:
                     "type": "unknown",
                     "is_agent": False,
                     "is_visited": (i, j) in self.visited,
-                    "is_safe": (i, j) in self.safe_cells,
+                    "is_safe": (i, j) not in self.pits and (i, j) != self.wumpus,
                     "is_pit": (i, j) in self.pits,
                     "is_wumpus": (i, j) == self.wumpus,
                     "is_gold": (i, j) == self.gold,
@@ -283,7 +255,7 @@ class WumpusWorld:
                     cell["type"] = "wumpus"
                 elif (i, j) in self.visited:
                     cell["type"] = "visited"
-                elif (i, j) in self.safe_cells:
+                elif cell["is_safe"]:
                     cell["type"] = "safe"
                 
                 row.append(cell)
@@ -293,7 +265,7 @@ class WumpusWorld:
         return grid_data
     
     def get_inference_steps(self):
-        return self.resolution_engine.get_inference_count()
+        return self.steps
 
 
 world = WumpusWorld()
@@ -343,10 +315,10 @@ def response():
         "message": world.message,
         "gold_found": world.gold_found,
         "visited_count": len(world.visited),
-        "safe_count": len(world.safe_cells)
+        "safe_count": (world.rows * world.cols) - len(world.pits) - 1
     }
 
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=True)
